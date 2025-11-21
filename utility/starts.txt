@@ -1,0 +1,3 @@
+python C:\xampp\htdocs\generatorediplomi6.1\app.py
+
+http://127.0.0.1:5000/
