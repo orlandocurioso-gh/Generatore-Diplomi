@@ -73,10 +73,11 @@
         .header-repubblica {
             font-size: 31pt;
             /*font-weight: bold;*/
-            margin-bottom: 32mm;  /*Spazio sotto ogni riga*/
+            margin-bottom: 34mm;  /*Spazio sotto ogni riga*/
             letter-spacing: 1.1px;
             color: #822433;
             line-height: 1.1;
+            margin-left: 1px;
         }
         .header-text {
             font-size: 27pt;
@@ -84,7 +85,8 @@
             margin-bottom: 3mm; /* MODIFICATO: Rimuove lo spazio sotto le righe header-text */
             letter-spacing: 0.3px;
             margin-top: 3mm; /* AGGIUNTO: Assicura che non ci sia spazio sopra */
-            line-height: 1.1;         
+            line-height: 1.1;
+            margin-left: 1px;         
         }
         .header-sapienza {
             font-size: 27pt;
@@ -94,12 +96,39 @@
             margin-top: 3mm; /* MODIFICATO: Rimuove lo spazio sopra */
             margin-bottom: 3mm; /* MODIFICATO: Rimuove lo spazio sotto */
             line-height: 1.1;
+            margin-left: 1px;
         }
         .header-conferisce {
             font-size: 27pt;
             letter-spacing: 0.3px;
             margin-top: 3mm; /* MODIFICATO: Rimuove lo spazio sopra */
             line-height: 1.1;
+            margin-left: 1px;
+        }
+        .corso-laurea {
+            font-size: 26pt;
+            letter-spacing: 0.3px;
+            font-weight: bold;
+            line-height: 1.0;
+            margin-top: 20mm;
+            margin-bottom: 5mm;
+            margin-left: 1px;
+        }
+        .classe-laurea {
+            font-size: 11pt;
+            margin-top: 3mm;
+            margin-bottom: 9mm;
+            margin-left: 1px;
+            font-weight: regular;
+            font-family: 'open-sans', sans-serif; /* AGGIUNTO: Imposta il font Arial con un fallback */
+            line-height: 0.5;
+            /*border: 2px solid black;*/
+        }
+        .con-lode {
+            font-size: 16pt;
+            font-weight: bold;
+            color: #8B4513; /* Colore per "CON LODE" */
+            margin-top: 5mm;
         }
         
         /* Stili per i campi dinamici (studente, corso) */
@@ -122,36 +151,15 @@
             color: #000000;
             margin-top: 15mm; /* Spazio sopra */
             margin-bottom: 0.5mm; /* Spazio sotto */
+            margin-left: 1px;
         }
         .dettagli-nascita {
             font-size: 11pt;
             margin-top:0.5mm;
             margin-bottom: 20mm; /* Spazio prima del blocco successivo */
+            margin-left: 1px;
             font-weight: regular;
             font-family: 'open-sans', sans-serif; /* AGGIUNTO: Imposta il font Arial con un fallback */
-        }
-        .corso-laurea {
-            font-size: 26pt;
-            letter-spacing: 0.3px;
-            font-weight: bold;
-            line-height: 1.5;
-            margin-top: 20mm;
-            margin-bottom: 6mm;
-        }
-        .classe-laurea {
-            font-size: 11pt;
-            margin-top: 3mm;
-            margin-bottom: 9mm;
-            font-weight: regular;
-            font-family: 'open-sans', sans-serif; /* AGGIUNTO: Imposta il font Arial con un fallback */
-            line-height: 0.5;
-            /*border: 2px solid black;*/
-        }
-        .con-lode {
-            font-size: 16pt;
-            font-weight: bold;
-            color: #8B4513; /* Colore per "CON LODE" */
-            margin-top: 5mm;
         }
         /* Area Firme e Nomi */
         .signature-area {
@@ -179,6 +187,7 @@
             /* align-self: flex-start;  Questa regola non è più necessaria qui se align-items: flex-start è sul genitore */
             /* Se vuoi spostare ulteriormente a sinistra l'intero blocco Rettrice, puoi aggiungere un margin-left negativo qui. Esempio: */
             margin-left: -29mm; /* DA CALIBRARE: Sposta il blocco della Rettrice ancora più a sinistra */
+            letter-spacing: 1px;
         }
         .signature-preside {
             /* La regola `flex` ci dà controllo sull'allineamento del singolo blocco */
@@ -187,14 +196,16 @@
             transform: translateX(-40mm); /* DA CALIBRARE: Sposta il blocco verso sinistra. Prova con -20mm, -30mm, ecc. orig 22*/
             /*border: 2px solid black;*/
             margin-right: 5px;
+            letter-spacing: 1px;
         }
         .signature-dg {
             /* La regola `flex` ci dà controllo sull'allineamento del singolo blocco */
             flex-grow: 1; /* Permette al blocco di occupare lo spazio disponibile */
             text-align: right; /* Allinea il testo e l'immagine all'interno del blocco a destra */
-            transform: translateX(-25mm); /* DA CALIBRARE: Sposta il blocco verso sinistra. Prova con -20mm, -30mm, ecc. */
+            transform: translateX(-22mm); /* DA CALIBRARE: Sposta il blocco verso sinistra. Prova con -20mm, -30mm, ecc. */
             /*border: 2px solid blue;*/
             margin-left: 105px;
+            letter-spacing: 1px;
         }
         .signature-bottom-row {
             display: flex;
