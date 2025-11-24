@@ -77,8 +77,12 @@ def upload_data():
             
             luogo_nascita_completo = student_data_for_template.get('luogonas', '').strip()
             stato_nascita = student_data_for_template.get('statnas', '').strip()
+            provincia_nascita=student_data_for_template.get('provnas', '').strip() ###
             
             # Condizione migliorata: aggiunge lo stato SOLO se il campo STATNAS è valorizzato.
+            if provincia_nascita: ###
+                luogo_nascita_completo += f" {provincia_nascita}" ###
+                
             if stato_nascita: 
                 # Aggiungiamo lo Stato tra parentesi
                 luogo_nascita_completo += f" {stato_nascita}"
@@ -157,7 +161,7 @@ def upload_data():
                 'corso_laurea': student_data_for_template.get('corsolau', ''),
                 'nome_studente': student_data_for_template.get('nom_cog', ''),
                 'luogo_nascita': student_data_for_template.get('luogonas', '').split('(')[0].strip() if student_data_for_template.get('luogonas') and '(' in student_data_for_template.get('luogonas') else student_data_for_template.get('luogonas', '').strip(),
-                'provincia_nascita': student_data_for_template.get('luogonas', '').split('(')[1].replace(')', '').strip() if '(' in student_data_for_template.get('luogonas', '') else '',
+                'provincia_nascita': student_data_for_template.get('provnas', '').split('(')[1].replace(')', '').strip() if '(' in student_data_for_template.get('provnas', '') else '',
                 'data_nascita': student_data_for_template.get('datanas', ''),
                 'data_stampa': student_data_for_template.get('datastamp', ''),
                 'numero_protocollo': student_data_for_template.get('protocol', ''),
