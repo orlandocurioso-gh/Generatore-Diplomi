@@ -110,6 +110,12 @@ def upload_data():
                 template_filename = 'diploma_forml28v7.html'
             elif modulo_value == 'forml28v7A':
                 template_filename = 'diploma_forml28v7A.html'
+            elif modulo_value == 'memoriastudi':
+                template_filename = 'diploma_memoriastudi.html'
+            elif modulo_value == 'memorialaureamag':
+                template_filename = 'diploma_memorialaureamag.html'
+            elif modulo_value == 'memorialaureatri':
+                template_filename = 'diploma_memorialaureatri.html'
             else:
                 log_entries.append(f"ATTENZIONE: Modulo '{modulo_value}' non riconosciuto per {student_data_for_template.get('nom_cog', 'uno studente')}. Saltando la generazione del PDF.")
                 continue 
