@@ -74,7 +74,7 @@
             font-size: 31pt;
             /*font-weight: bold;*/
             margin-bottom: 32mm;  /*Spazio sotto ogni riga 32*/
-            margin-top: 30px;/*32*/            
+            margin-top: 32px;
             letter-spacing: 1.1px;
             color: #822433;
             line-height: 1.2;
@@ -114,7 +114,7 @@
             font-size: 26pt;
             letter-spacing: 0.3px;
             font-weight: bold;
-            line-height: 1.5 !important;
+            line-height: 1.0;
             margin-top: 20mm;
             margin-bottom: 5mm;
             margin-left: 1px;
@@ -144,14 +144,14 @@
         }
         .nome-studente {
             font-size: 27pt;
-            letter-spacing: 1.2px;
+            letter-spacing: 1.1px;
             font-weight: bold;
             color: #822433; /* Rosso Sapienza */
             margin-top: 15mm; /* Spazio sopra */
             margin-bottom: 0.5mm; /* Spazio sotto */
         }
         .nome-studente .intro-nome {
-            font-size: 21pt;
+            font-size: 20pt;
             /*font-weight: bold;*/
             color: #000000;
             margin-top: 15mm; /* Spazio sopra */
@@ -324,7 +324,7 @@
             <p class="header-text">In nome della legge</p>
             <p class="header-text">la Rettrice della</p>
             <p class="header-sapienza">Sapienza Università di Roma</p>
-            <p class="header-conferisce">conferisce la Laurea magistrale in</p>
+            <p class="header-conferisce">conferisce alla memoria <br> la Laurea in</p>
 
             <p class="field corso-laurea">{{ corsolau | safe }}</p>
             <!--<p class="field classe-laurea">{{ classe }}<br> ({{ indicorso }})</p>-->
@@ -345,7 +345,6 @@
                 </span>
                 {{ nom_cog | safe}}
             </p>
-            <!--<p class="field nome-studente"><span class="intro-nome">A </span>{{ nom_cog | safe}}</p>-->
             <p class="field dettagli-nascita">{{ sesso }} {{ luogonas }} il {{ datanas }}</p>
 
         </div>
