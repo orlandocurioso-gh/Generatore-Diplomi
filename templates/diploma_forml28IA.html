@@ -209,7 +209,17 @@
                 <p class="field con-lode">CON LODE</p>
             {% endif %}
 
-            <p class="field nome-studente"><span class="intro-nome">A </span>{{ nom_cog }}</p>
+            <p class="field nome-studente">
+                <span class="intro-nome">
+                    {% set first_letter = nom_cog|string|trim|upper|first %}
+                    {% if first_letter in ['A', 'E', 'I', 'O', 'U'] %}
+                        ad 
+                    {% else %}
+                        a 
+                    {% endif %}
+                </span>
+                {{ nom_cog | safe}}
+            </p>
             <p class="field dettagli-nascita">{{ sesso }} {{ luogonas }} il {{ datanas }}</p>
 
         </div>

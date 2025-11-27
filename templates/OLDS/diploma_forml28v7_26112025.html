@@ -74,7 +74,7 @@
             font-size: 31pt;
             /*font-weight: bold;*/
             margin-bottom: 32mm;  /*Spazio sotto ogni riga 32*/
-            margin-top: 30px;/*32*/            
+            margin-top: 32px;
             letter-spacing: 1.1px;
             color: #822433;
             line-height: 1.2;
@@ -114,7 +114,7 @@
             font-size: 26pt;
             letter-spacing: 0.3px;
             font-weight: bold;
-            line-height: 1.5 !important;
+            line-height: 1.0;
             margin-top: 20mm;
             margin-bottom: 5mm;
             margin-left: 1px;
@@ -144,14 +144,14 @@
         }
         .nome-studente {
             font-size: 27pt;
-            letter-spacing: 3px;
+            letter-spacing: 1.1px;
             font-weight: bold;
             color: #822433; /* Rosso Sapienza */
             margin-top: 15mm; /* Spazio sopra */
             margin-bottom: 0.5mm; /* Spazio sotto */
         }
         .nome-studente .intro-nome {
-            font-size: 21pt;
+            font-size: 20pt;
             /*font-weight: bold;*/
             color: #000000;
             margin-top: 15mm; /* Spazio sopra */
@@ -198,7 +198,7 @@
             /* La regola `flex` ci dà controllo sull'allineamento del singolo blocco */
             flex-grow: 1; /* Permette al blocco di occupare lo spazio disponibile */
             text-align: right; /* Allinea il testo e l'immagine all'interno del blocco a destra */
-            transform: translateX(-37mm); /* DA CALIBRARE: Sposta il blocco verso sinistra. Prova con -20mm, -30mm, ecc. orig 22*/
+            transform: translateX(-40mm); /* DA CALIBRARE: Sposta il blocco verso sinistra. Prova con -20mm, -30mm, ecc. orig 22*/
             /*border: 2px solid black;*/
             margin-right: 5px;
             letter-spacing: 1px;
@@ -238,7 +238,7 @@
             margin-bottom: 5mm;
         }
         .firma-img {
-            width: 300px; /* CAMBIATO: Prova con una larghezza fissa, non max-width */
+            width: 250px; /* CAMBIATO: Prova con una larghezza fissa, non max-width */
             height: auto;
             /*border: 2px solid blue;  AGGIUNTO: Aggiungiamo un bordo per vedere se lo stile viene applicato */
             display: block;
@@ -248,18 +248,18 @@
             z-index: 1;
         }
         .firma-img-preside {
-            width: 300px; /* CAMBIATO: Prova con una larghezza fissa, non max-width */
+            width: 250px; /* CAMBIATO: Prova con una larghezza fissa, non max-width */
             height: auto;
             /*border: 2px solid blue;*/
             display: block;
             margin: 0 auto;
-            margin-top: -70px; /*Distanza tra titolo e immagine firma*/
+            margin-top: -60px; /*Distanza tra titolo e immagine firma*/
             margin-bottom: 5px;
             margin-left: 61px;
             z-index: 1;
         }
         .firma-img-rector {
-            width: 300px; /* CAMBIATO: Prova con una larghezza fissa, non max-width */
+            width: 250px; /* CAMBIATO: Prova con una larghezza fissa, non max-width */
             height: auto;
             /*border: 2px solid blue;  AGGIUNTO: Aggiungiamo un bordo per vedere se lo stile viene applicato */
             display: block;
@@ -276,17 +276,17 @@
         /* Blocco Dettagli Footer (Matricola, Protocollo, Date, etc.) */
         .detail-block {
             position: absolute;
-            bottom: 11mm; /* DA CALIBRARE: Distanza dal fondo della pagina A3 */
+            bottom: 8mm; /* DA CALIBRARE: Distanza dal fondo della pagina A3 */
             text-align: left;
             font-size: 10pt;
-            line-height: 0.8;
+            line-height: 1.0;
             color: #555;
             left: 100mm; /* DA CALIBRARE: Aumentato per spostare a destra */
             font-family: 'open-sans', serif; /* Esempio: aggiungi la stessa font-family */
             margin-left: -5mm;
         }
         .detail-line-item {
-            margin-bottom: 1.5mm; /* Spazio tra le righe di dettaglio */
+            margin-bottom: 2mm; /* Spazio tra le righe di dettaglio */
         }
 
         /* Blocco Testo Legale Fisso in basso a destra (di fronte al blocco dettagli) */
@@ -334,18 +334,7 @@
                 <p class="field con-lode">CON LODE</p>
             {% endif %}
 
-            <p class="field nome-studente">
-                <span class="intro-nome">
-                    {% set first_letter = nom_cog|string|trim|upper|first %}
-                    {% if first_letter in ['A', 'E', 'I', 'O', 'U'] %}
-                        ad 
-                    {% else %}
-                        a 
-                    {% endif %}
-                </span>
-                {{ nom_cog | safe}}
-            </p>
-            <!--<p class="field nome-studente"><span class="intro-nome">A </span>{{ nom_cog | safe}}</p>-->
+            <p class="field nome-studente"><span class="intro-nome">A </span>{{ nom_cog | safe}}</p>
             <p class="field dettagli-nascita">{{ sesso }} {{ luogonas }} il {{ datanas }}</p>
 
         </div>
