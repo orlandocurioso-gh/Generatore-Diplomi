@@ -11,6 +11,88 @@ from datetime import datetime
 import threading
 import uuid
 
+# ... (dopo gli import, prima di app = Flask...)
+
+def format_place_name(place_str):
+    """
+    Formatta una stringa di luogo (Comune, Provincia, Stato):
+    - Title-case tutte le parole.
+    - Converte in minuscolo le preposizioni, gli articoli e le forme elise ('d', 'l').
+    - Gestisce correttamente la capitalizzazione dei nomi propri con apostrofo (es. L'Aquila).
+    """
+    if not place_str:
+        return ""
+
+    # Set di preposizioni/articoli comuni da mantenere in minuscolo
+    PREPOSITIONS = {
+        'di', 'del', 'della', 'degli', 'dei', 'de', 'da', 'dal', 
+        'dalla', 'dai', 'dagli', 'su', 'sul', 'sulla', 'sui', 
+        'sugli', 'a', 'al', 'alla', 'ai', 'agli', 'in', 'nel', 
+        'nella', 'nei', 'negli', 'per', 'con', 'e', 'il', 'lo', 'la', 'gli', 'le', 
+        "d'", "l'","de'",'val','meno'
+    }
+
+    # Converto l'intera stringa in minuscolo per processare le parole
+    words = place_str.lower().split()
+    final_formatted_words = []
+    
+    for i, word in enumerate(words):
+        
+        formatted_word = word
+        
+        # 1. Gestione di TUTTE le parole che sono solo preposizioni/articoli e non sono la prima
+        if word in PREPOSITIONS and i > 0:
+            final_formatted_words.append(word.lower()) 
+            continue
+            
+        # 2. Gestione di Elisioni complesse con apostrofo ('d'America', 'L'Aquila')
+        if word.find('\'') != -1:
+            index = word.find('\'')
+            
+            # Parte prima dell'apostrofo (d, l, ecc.)
+            prefix = word[:index+1]
+            
+            # Parte dopo l'apostrofo (america, aquila, ecc.)
+            suffix = word[index+1:]
+            
+            if prefix.lower() in PREPOSITIONS and i > 0:
+                 # Caso d'America (non è la prima parola, e la d' è una preposizione elisa)
+                 formatted_word = prefix.lower() + suffix.capitalize()
+            else:
+                 # Caso L'Aquila / D'Annunzio (o è la prima parola, o non è una preposizione)
+                 formatted_word = prefix.capitalize() + suffix.capitalize()
+
+        else:
+            # 3. Capitalizzazione standard (Vico, Roma, ecc.)
+            formatted_word = word.capitalize()
+            
+        
+        # Aggiungo la parola formattata
+        final_formatted_words.append(formatted_word)
+            
+    return ' '.join(final_formatted_words)
+
+
+# Incolliamo anche questa, può servire per la formattazione di nom_cog
+def format_name_with_exceptions(name_str):
+    """
+    Formato una stringa di nome/cognome. Se non usi '%' la logica è Title Case.
+    """
+    if not name_str:
+        return ""
+
+    words = name_str.split()
+    formatted_parts = []
+    
+    for word in words:
+        if word.startswith('%'):
+            cleaned_word = word[1:].lower()
+            formatted_parts.append(cleaned_word)
+        else:
+            formatted_parts.append(word.lower().capitalize())
+            
+    return ' '.join(formatted_parts)
+
 app = Flask(__name__, static_folder='static')
 
 temp_pdf_batches = {}
@@ -57,38 +139,43 @@ def upload_data():
         
         generated_pdf_filenames = [] 
 
+# ... all'interno della funzione upload_data ...
+
         for i, student in enumerate(students_data):
-            # Tutte le chiavi (incluse le nuove FIRMA4, LOGO1, etc.) sono messe in minuscolo.
+             # Tutte le chiavi (incluse le nuove FIRMA4, LOGO1, etc.) sono messe in minuscolo.
             student_data_for_template = {
                 key.lower(): value for key, value in student.items()
             }
 
-            # --- MODIFICA CRUCIALE QUI ---
-            # Sostituisci il separatore di linea (ad esempio, '|') nel campo 'corsolau'
-            # con il tag HTML di a capo <br>.
-            corsolau_raw = student_data_for_template.get('corsolau', '')  
-            nom_cog_raw = student_data_for_template.get('nom_cog', '') ###
-
-            # Se nel TXT hai usato '%'
+            # Applicazione della formattazione avanzata al nome e cognome
+            corsolau_raw = student_data_for_template.get('corsolau', '')
             student_data_for_template['corsolau'] = corsolau_raw.replace('|', '<br>')
-            student_data_for_template['nom_cog'] = nom_cog_raw.replace('|', '<br>') ###
+            nom_cog_raw = student_data_for_template.get('nom_cog', '')
+            student_data_for_template['nom_cog'] = format_name_with_exceptions(nom_cog_raw.replace('|', '<br>')) 
+
+            # --- NUOVA LOGICA: Gestione e Formattazione di Luogo di Nascita e Stato (STATNAS) ---
+
+            # Estrai e formatta i componenti separatamente
+            comune_nascita = format_place_name(student_data_for_template.get('luogonas', '').strip())
+            stato_nascita = format_place_name(student_data_for_template.get('statnas', '').strip())
+            provincia_nascita = format_place_name(student_data_for_template.get('provnas', '').strip())
+
+            # Ricostruisci la stringa finale
+            luogo_nascita_completo = comune_nascita
             
-            # --- NUOVA LOGICA: Gestione di Luogo di Nascita e Stato (STATNAS) ---
-            
-            luogo_nascita_completo = student_data_for_template.get('luogonas', '').strip()
-            stato_nascita = student_data_for_template.get('statnas', '').strip()
-            provincia_nascita=student_data_for_template.get('provnas', '').strip() ###
-            
-            # Condizione migliorata: aggiunge lo stato SOLO se il campo STATNAS è valorizzato.
-            if provincia_nascita: ###
-                luogo_nascita_completo += f" {provincia_nascita}" ###
-                
-            if stato_nascita: 
-                # Aggiungiamo lo Stato tra parentesi
-                luogo_nascita_completo += f" {stato_nascita}"
-            
-            # Sovrascriviamo la chiave 'luogonas' per l'uso nel template
+            if provincia_nascita: 
+                # Se c'è la provincia, la aggiungiamo tra parentesi (es. Cava de' Tirreni (Salerno))
+                luogo_nascita_completo += f" ({provincia_nascita})"
+
+            if stato_nascita and stato_nascita.upper() not in ['ITALIA', 'IT', 'I']: 
+                # Se è uno Stato estero, lo aggiungiamo (e potresti voler decidere se rimuovere la provincia in questo caso)
+                # Per semplicità, lo aggiungiamo come testo libero, ma potresti volerlo tra parentesi:
+                luogo_nascita_completo += f" ({stato_nascita})" 
+
+ # Sovrascriviamo la chiave 'luogonas' per l'uso nel template
             student_data_for_template['luogonas'] = luogo_nascita_completo
+            student_data_for_template['statnas'] = stato_nascita # Aggiorna lo stato se dovesse servire separatamente
+            student_data_for_template['provnas'] = provincia_nascita # Aggiorna la provincia
             
             # ----------------------------------------------------------------------
 
