@@ -29,7 +29,7 @@ def format_place_name(place_str):
         'dalla', 'dai', 'dagli', 'su', 'sul', 'sulla', 'sui', 
         'sugli', 'a', 'al', 'alla', 'ai', 'agli', 'in', 'nel', 
         'nella', 'nei', 'negli', 'per', 'con', 'e', 'il', 'lo', 'la', 'gli', 'le', 
-        "d'", "l'","de'",'val','meno'
+        "d'", "l'","de'",'val','meno',"all'"
     }
 
     # Converto l'intera stringa in minuscolo per processare le parole
