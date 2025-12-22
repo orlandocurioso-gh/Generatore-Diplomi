@@ -183,9 +183,46 @@
     <div class="controls">
         <a href="{{ download_url }}">Scarica Tutti i Diplomi (ZIP)</a>
         <a href="{{ log_url }}" class="log-button">Scarica Log</a>
+        <button onclick="archiviaBatch()" id="btnArchivia" style="background-color: #ff9800; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; margin: 0 10px;">
+        Archivia
+        </button>
+
+        <p id="archiveStatus" style="margin-top: 10px; font-weight: bold;"></p>
         <p>I file generati saranno disponibili per {{ cleanup_delay_minutes }} minuti.</p>
         <p style="margin-top: 30px;">Una volta scaricato, puoi tornare alla pagina di <a href="http://127.0.0.1:5000/">Upload</a> per un nuovo batch.</p>
     </div>
+
+    <script>
+        function archiviaBatch() {
+            const btn = document.getElementById('btnArchivia');
+            const status = document.getElementById('archiveStatus');
+            
+            if (!confirm("Vuoi procedere con l'archiviazione locale e l'aggiornamento del registro Excel?")) return;
+
+            btn.disabled = true;
+            btn.innerText = "Archiviazione in corso...";
+            status.innerText = "Attendere...";
+
+            // Chiamata alla rotta Flask
+            fetch("{{ url_for('archive_batch', batch_id=request.view_args['batch_id']) }}", {
+                method: 'POST'
+            })
+            .then(response => response.text())
+            .then(data => {
+                status.style.color = "green";
+                status.innerText = data;
+                btn.innerText = "Archiviato";
+                btn.style.backgroundColor = "#ccc";
+            })
+            .catch(error => {
+                status.style.color = "red";
+                status.innerText = "Errore: " + error;
+                btn.disabled = false;
+                btn.innerText = "Archivia";
+            });
+        }
+    </script>
+
 
     {% if pdf_list %}
         <div class="main-preview-container">

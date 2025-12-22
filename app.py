@@ -10,8 +10,22 @@ import os
 from datetime import datetime
 import threading
 import uuid
+import openpyxl
+from openpyxl import Workbook, load_workbook
+import pathlib
+
 
 # ... (dopo gli import, prima di app = Flask...)
+
+# Configurazione percorsi di archiviazione (MODIFICA QUESTI PERCORSI)
+PATH_ARCHIVIO_1 = "C://xampp/htdocs//generatorediplomi6.8//Copia_1"
+PATH_ARCHIVIO_2 = "C://xampp/htdocs//generatorediplomi6.8//Copia_2"
+PATH_EXCEL_REGISTRO = "C://xampp/htdocs//generatorediplomi6.8//Registri"
+
+# Assicurati che le cartelle esistano all'avvio
+for p in [PATH_ARCHIVIO_1, PATH_ARCHIVIO_2, PATH_EXCEL_REGISTRO]:
+    os.makedirs(p, exist_ok=True)
+
 
 def format_place_name(place_str):
     """
@@ -139,7 +153,7 @@ def upload_data():
         
         generated_pdf_filenames = [] 
 
-# ... all'interno della funzione upload_data ...
+        # ... all'interno della funzione upload_data ...
 
         for i, student in enumerate(students_data):
              # Tutte le chiavi (incluse le nuove FIRMA4, LOGO1, etc.) sono messe in minuscolo.
@@ -172,7 +186,7 @@ def upload_data():
                 # Per semplicità, lo aggiungiamo come testo libero, ma potresti volerlo tra parentesi:
                 luogo_nascita_completo += f" ({stato_nascita})" 
 
- # Sovrascriviamo la chiave 'luogonas' per l'uso nel template
+            # Sovrascriviamo la chiave 'luogonas' per l'uso nel template
             student_data_for_template['luogonas'] = luogo_nascita_completo
             student_data_for_template['statnas'] = stato_nascita # Aggiorna lo stato se dovesse servire separatamente
             student_data_for_template['provnas'] = provincia_nascita # Aggiorna la provincia
@@ -292,9 +306,11 @@ def upload_data():
             # Aggiungi i nomi dei file generati per questo studente alla lista principale
             generated_pdf_filenames.extend(student_pdfs)
 
-        # --- INIZIO: Generazione del PDF combinato (solo diplomi) ---
-        diploma_filenames = [f for f in generated_pdf_filenames if f.startswith('diploma_')]
+        # Recuperiamo metadati dal primo studente per l'archiviazione
+        primo_studente = students_data[0] if students_data else {}
         
+        # 1. Generazione del PDF combinato (solo diplomi)
+        diploma_filenames = [f for f in generated_pdf_filenames if f.startswith('diploma_')]
         if diploma_filenames:
             merger = PdfWriter()
             combined_pdf_filename = f'tutti_i_diplomi_{nome_cartella}.pdf'
@@ -304,38 +320,133 @@ def upload_data():
                 try:
                     merger.append(file_path_to_merge)
                 except Exception as e:
-                    print(f"ATTENZIONE: Impossibile unire il file {pdf_filename} al PDF combinato. Errore: {e}")
+                    print(f"Errore merge: {e}")
             merger.write(combined_pdf_path)
             merger.close()
-            
-            # Aggiungi il nome del file combinato alla lista per il download
             generated_pdf_filenames.append(combined_pdf_filename)
-        # --- FINE: Generazione del PDF combinato ---
-        
+
+        # 2. Creazione del contenuto del LOG (ora lo definiamo PRIMA di usarlo)
         log_content = '\n'.join(log_entries)
-        
         log_file_path = os.path.join(current_batch_temp_dir, 'log_creazione_diplomi.txt')
         with open(log_file_path, 'w', encoding='utf-8') as f:
             f.write(log_content)
-            
+
+        protocollo_raw = primo_studente.get('PROTOCOL', '').strip()
+        protocollo_clean = protocollo_raw.split('/')[0] if '/' in protocollo_raw else protocollo_raw
+
+
+
+        # 3. Preparazione METADATI per l'archiviazione (Prendiamo i dati dal primo studente del CSV)
+        facolta = primo_studente.get('CORSOLAU', 'N-A').replace(' ', '')
+        anno_laurea = primo_studente.get('DATALAUR', datetime.now().strftime('%Y')).replace(' ', '')
+        tipologia = "Pergamena"
+        # Esempio: se il modulo contiene 'tri', allora è Triennale
+        modulo_primo = primo_studente.get('CLASSE', '')
+        if 'LM-' in modulo_primo: tipologia = "LM"
+        else: tipologia = "LT"
+
+        # 4. Salvataggio nel dizionario globale (con log_content finalmente definito)
         temp_pdf_batches[batch_id] = {
             'temp_dir': current_batch_temp_dir,
             'filenames': generated_pdf_filenames,
             'log_content': log_content,
             'log_file_path': log_file_path,
-            'original_folder_name': nome_cartella
+            'original_folder_name': nome_cartella,
+            'metadata': {
+                'protocollo': protocollo_clean,
+                'tipologia': tipologia,
+                'facolta': facolta,
+                'anno_laurea': anno_laurea,
+                'nomi_persone': [s.get('NOM_COG', 'N/A') for s in students_data],
+                'totale': len(students_data)
+            }
         }
         
+        # 5. Avvio timer pulizia
         timer = threading.Timer(CLEANUP_DELAY_SECONDS, cleanup_batch_data, args=[batch_id])
         timer.start()
 
         return redirect(url_for('preview_pdfs', batch_id=batch_id))
-
+    
     return 'Errore sconosciuto', 500
 
 
 #### Rotte di Servizio dei File
+# --- NUOVA ROTTA ARCHIVIA ---
 
+@app.route('/archive/<batch_id>', methods=['POST'])
+def archive_batch(batch_id):
+    batch_info = temp_pdf_batches.get(batch_id)
+    if not batch_info:
+        return "Batch non trovato", 404
+    # Controllo duplicati
+    if batch_info.get('archived', False):
+        return "Questo batch è già stato archiviato.", 200
+
+    meta = batch_info['metadata']
+    now = datetime.now()
+    timestamp_str = now.strftime('%d%m%Y_%H%M')
+    
+    # 1. Creazione Nome Cartella/Zip
+    # Formato: LaureaTriennale_40_Ingegneria_2010_22122025_1530
+    folder_name = f"{meta['tipologia']}_{meta['totale']}_{meta['facolta']}_{meta['anno_laurea']}_{timestamp_str}"
+    zip_filename = f"{folder_name}.zip"
+    temp_zip_path = os.path.join(batch_info['temp_dir'], zip_filename)
+
+    # 2. Creazione del Log specifico per l'archivio
+    archive_log_path = os.path.join(batch_info['temp_dir'], "log_archivio.txt")
+    with open(archive_log_path, 'w', encoding='utf-8') as f:
+        f.write(f"PRODUZIONE PERGAMENE - {now.strftime('%d/%m/%Y %H:%M')}\n")
+        f.write(f"Tipologia: {meta['tipologia']}\n")
+        f.write(f"Totale pergamene: {meta['totale']}\n")
+        f.write("-" * 30 + "\n")
+        for nome in meta['nomi_persone']:
+            f.write(f"- {nome}\n")
+
+    # 3. Creazione dello ZIP (contenente solo PDF e il nuovo log)
+    with zipfile.ZipFile(temp_zip_path, 'w', zipfile.ZIP_DEFLATED) as zf:
+        for filename in batch_info['filenames']:
+            if filename.startswith('diploma_'): # Includiamo solo le pergamene come da tua richiesta
+                file_path = os.path.join(batch_info['temp_dir'], filename)
+                zf.write(file_path, arcname=os.path.join(folder_name, filename))
+        zf.write(archive_log_path, arcname=os.path.join(folder_name, "log_nominativi.txt"))
+
+    # 4. Copia nelle due cartelle locali
+    try:
+        shutil.copy2(temp_zip_path, os.path.join(PATH_ARCHIVIO_1, zip_filename))
+        shutil.copy2(temp_zip_path, os.path.join(PATH_ARCHIVIO_2, zip_filename))
+    except Exception as e:
+        return f"Errore durante la copia nei server: {e}", 500
+
+    # 5. Aggiornamento Registro Excel
+    excel_path = os.path.join(PATH_EXCEL_REGISTRO, f"Pergamene_{now.year}.xlsx")
+    new_row = [
+                meta['protocollo'], 
+                meta['tipologia'], 
+                meta['totale'], 
+                meta['facolta'], 
+                meta['anno_laurea'], 
+                now.strftime('%d/%m/%Y %H:%M')
+            ]
+    
+    try:
+        if not os.path.exists(excel_path):
+            wb = Workbook()
+            ws = wb.active
+            ws.append(["Protocollo","Tipologia", "Totale PDF", "Facoltà", "Anno Laurea", "Data Stampa"])
+        else:
+            wb = load_workbook(excel_path)
+            ws = wb.active
+        
+        ws.append(new_row)
+        wb.save(excel_path)
+        batch_info['archived'] = True
+        return f"Archiviato con successo. Protocollo: {meta['protocollo']}", 200
+    
+    except Exception as e:
+        return f"File Excel in uso o errore: {e}", 500
+
+    #return f"Archiviazione completata con successo in: {folder_name}"
 
 @app.route('/preview/<batch_id>')
 def preview_pdfs(batch_id):
