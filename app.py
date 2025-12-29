@@ -14,11 +14,16 @@ import openpyxl
 from openpyxl import Workbook, load_workbook
 import pathlib
 
-# --- CONFIGURAZIONE PERCORSI ---
-PATH_ARCHIVIO_1 = "C://xampp/htdocs//generatorediplomi6.9//Locale"
-PATH_ARCHIVIO_2 = "C://xampp/htdocs//generatorediplomi6.9//Franco"
-PATH_EXCEL_REGISTRO = "C://xampp/htdocs//generatorediplomi6.9//Registri"
+# --- CONFIGURAZIONE PERCORSI RELATIVI ---
+# Rileva la cartella dove si trova app.py
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+# Crea i percorsi relativi alla cartella del progetto
+PATH_ARCHIVIO_1 = os.path.join(BASE_DIR, "Archivio_Locale")
+PATH_ARCHIVIO_2 = os.path.join(BASE_DIR, "Archivio_Franco")
+PATH_EXCEL_REGISTRO = os.path.join(BASE_DIR, "Registri")
+
+# Assicurati che le cartelle esistano all'avvio
 for p in [PATH_ARCHIVIO_1, PATH_ARCHIVIO_2, PATH_EXCEL_REGISTRO]:
     os.makedirs(p, exist_ok=True)
 
