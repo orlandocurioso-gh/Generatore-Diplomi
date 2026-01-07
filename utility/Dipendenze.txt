@@ -1,0 +1,4 @@
+Flask
+WeasyPrint
+pypdf
+gtk3
