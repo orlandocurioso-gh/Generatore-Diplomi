@@ -143,6 +143,7 @@ def upload_data():
             'forml29v7': 'diploma_forml29v7.html',
             'forml28v7': 'diploma_forml28v7.html',
             'forml28v7A': 'diploma_forml28v7A.html',
+            'forml28IA': 'diploma_forml28IA.html',
             'memoriastudi': 'diploma_memoriastudi.html',
             'memorialaureamag': 'diploma_memorialaureamag.html',
             'memorialaureatri': 'diploma_memorialaureatri.html'
